@@ -7,6 +7,7 @@ import supportTicketRouter from "./supports/supportTicket.route";
 import venueRouter from "./venues/venues.route";
 import authRouter from "./auth/auth.route";
 import { rateLimiterMiddleware } from "./middleware/rateLimiter";
+import { swaggerDocs } from './config/swaggarConfig';
 
 dotenv.config();
 
@@ -35,6 +36,7 @@ app.use("/api", authRouter);
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
+  swaggerDocs(app, PORT);
 });
 
 
