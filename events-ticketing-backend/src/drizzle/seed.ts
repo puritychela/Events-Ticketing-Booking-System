@@ -89,51 +89,56 @@ import {
       .returning();
 
     // 3. Events
-    const insertedEvents = await db
-      .insert(event)
-      .values([
-        {
-          title: 'Tech Summit 2025',
-          description: 'A technology conference showcasing the latest innovations.',
-          venueId: insertedVenues[0].venueId,
-          category: 'Technology',
-          date: '2025-08-10',
-          time: '10:00:00',
-          ticketPrice: '1500.00',
-          ticketsTotal: 300,
-        },
-        {
-          title: 'Music Fiesta',
-          description: 'An outdoor music concert with local artists.',
-          venueId: insertedVenues[1].venueId,
-          category: 'Music',
-          date: '2025-09-05',
-          time: '17:00:00',
-          ticketPrice: '2000.00',
-          ticketsTotal: 500,
-        },
-        {
-          title: 'Business Expo',
-          description: 'Networking for local entrepreneurs.',
-          venueId: insertedVenues[2].venueId,
-          category: 'Business',
-          date: '2025-07-20',
-          time: '09:00:00',
-          ticketPrice: '1000.00',
-          ticketsTotal: 700,
-        },
-        {
-          title: 'Health & Wellness Fair',
-          description: 'A day for promoting healthy lifestyles.',
-          venueId: insertedVenues[3].venueId,
-          category: 'Health',
-          date: '2025-10-15',
-          time: '08:00:00',
-          ticketPrice: '1200.00',
-          ticketsTotal: 800,
-        },
-      ])
-      .returning();
+const insertedEvents = await db
+  .insert(event)
+  .values([
+    {
+      title: 'Tech Summit 2025',
+      description: 'A technology conference showcasing the latest innovations.',
+      venueId: insertedVenues[0].venueId,
+      category: 'Technology',
+      date: '2025-08-10',
+      time: '10:00:00',
+      ticketPrice: '1500.00',
+      ticketsTotal: 300,
+      imageUrl: 'https://source.unsplash.com/600x400/?technology,conference'
+    },
+    {
+      title: 'Music Fiesta',
+      description: 'An outdoor music concert with local artists.',
+      venueId: insertedVenues[1].venueId,
+      category: 'Music',
+      date: '2025-09-05',
+      time: '17:00:00',
+      ticketPrice: '2000.00',
+      ticketsTotal: 500,
+      imageUrl: 'https://source.unsplash.com/600x400/?music,concert'
+    },
+    {
+      title: 'Business Expo',
+      description: 'Networking for local entrepreneurs.',
+      venueId: insertedVenues[2].venueId,
+      category: 'Business',
+      date: '2025-07-20',
+      time: '09:00:00',
+      ticketPrice: '1000.00',
+      ticketsTotal: 700,
+      imageUrl: 'https://source.unsplash.com/600x400/?business,networking'
+    },
+    {
+      title: 'Health & Wellness Fair',
+      description: 'A day for promoting healthy lifestyles.',
+      venueId: insertedVenues[3].venueId,
+      category: 'Health',
+      date: '2025-10-15',
+      time: '08:00:00',
+      ticketPrice: '1200.00',
+      ticketsTotal: 800,
+      imageUrl: 'https://source.unsplash.com/600x400/?health,wellness'
+    },
+  ])
+  .returning();
+
 
     // 4. Bookings
     const insertedBookings = await db

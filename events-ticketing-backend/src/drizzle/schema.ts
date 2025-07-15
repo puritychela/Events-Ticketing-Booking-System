@@ -61,9 +61,11 @@ export const event = pgTable("events", {
   ticketPrice: decimal("ticket_price", { precision: 10, scale: 2 }),
   ticketsTotal: integer("tickets_total"),
   ticketsSold: integer("tickets_sold").default(0),
+  imageUrl: varchar("image_url", { length: 255 }), // ✅ added image field
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
+
 
 export const eventRelations = relations(event, ({ many, one }) => ({
   venue: one(venue, {

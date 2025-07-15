@@ -6,6 +6,7 @@
     "rootDir": "./src",
     "moduleResolution": "nodenext",
     "strict": true,
+    "resolveJsonModule": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true

@@ -1,11 +1,27 @@
-import { Request, Response, NextFunction } from "express";
-import { ZodSchema } from "zod";
+// src/middleware/validate.ts
 
-export const validate = (schema: ZodSchema<any>) => (req: Request, res: Response, next: NextFunction) => {
-  try {
-    schema.parse(req.body); // Throws if validation fails
-    next();
-  } catch (error: any) {
-    return res.status(400).json({ error: error.errors || "Invalid request" });
-  }
+import { Request, Response, NextFunction, RequestHandler } from "express";
+import { AnyZodObject } from "zod";
+
+export const validate = (schema: AnyZodObject): RequestHandler => {
+  return (req, res, next) => {
+    try {
+      schema.parse({
+        body: req.body,
+        query: req.query,
+        params: req.params,
+      });
+
+      next(); // ✅ Valid input, proceed
+    } catch (error: any) {
+      res.status(400).json({
+        message: "Validation failed",
+        errors: error.errors || "Invalid request",
+      });
+
+      return; // ✅ ensures consistent return type
+    }
+  };
 };
+
+

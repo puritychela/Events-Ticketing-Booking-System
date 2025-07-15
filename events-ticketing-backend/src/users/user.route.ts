@@ -8,7 +8,7 @@ import {
 } from "./user.controller";
 import { adminRoleAuth } from "../middleware/bearAuth";
 import { validate } from "../middleware/validate";
-import { createUserSchema, updateUserSchema } from "../validators/user.validator";
+import { createUserSchema, updateUserSchema } from "../validators/users.validator";
 
 const userRouter = Router();
 
@@ -31,7 +31,7 @@ const userRouter = Router();
  *       200:
  *         description: List of users
  */
-userRouter.get("/", adminRoleAuth, getUsers);
+userRouter.get("/", adminRoleAuth,  getUsers);
 
 /**
  * @swagger
@@ -92,7 +92,7 @@ userRouter.get("/:id", adminRoleAuth, getUserById);
  *       201:
  *         description: User created
  */
-userRouter.post("/", createUser);
+userRouter.post("/",validate(createUserSchema), createUser);
 
 /**
  * @swagger
@@ -129,7 +129,7 @@ userRouter.post("/", createUser);
  *       404:
  *         description: User not found
  */
-userRouter.put("/:id", updateUser);
+userRouter.put("/:id",validate(updateUserSchema), updateUser);
 
 /**
  * @swagger

@@ -7,6 +7,7 @@ import {
   deletePayment,
 } from "./payments.controller";
 
+
 const paymentRouter = Router();
 
 // Base path: /api/users (from server.ts)
