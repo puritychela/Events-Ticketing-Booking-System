@@ -11,8 +11,7 @@
     "migrate": " tsx src/drizzle/migrate.ts",
     "studio": "drizzle-kit studio",
     "push": " drizzle-kit generate && tsx src/drizzle/migrate.ts",
-    "seed": "tsx src/drizzle/seed.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "seed": "tsx src/drizzle/seed.ts"
   },
   "keywords": [],
   "author": "",
