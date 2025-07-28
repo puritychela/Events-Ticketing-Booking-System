@@ -10,6 +10,7 @@ import { rateLimiterMiddleware } from "./middleware/rateLimiter";
 import { swaggerDocs } from './config/swaggarConfig';
 import paymentRouter from "./payments/payments.route";
 import darajaRouter from "./darajaPayments/daraja.route";
+// import ticketReplyRouter from "./ticketsReply/TicketsReply.route";
 import cors from 'cors'
 
 
@@ -33,11 +34,12 @@ app.get("/", (req, res) => {
 app.use("/api/users", userRouter);
 app.use("/api/events", eventRouter);
 app.use("/api/bookings", bookingRouter);
-app.use("/api/supportTickets", supportTicketRouter);
+app.use("/api/support", supportTicketRouter);
 app.use("/api/venues", venueRouter);
 app.use("/api", authRouter);
 app.use("/api/payments", paymentRouter);
 app.use("/api/darajaPayments", darajaRouter);
+// app.use("/api", ticketReplyRouter);
 
 // Start server
 const PORT = process.env.PORT || 5000;

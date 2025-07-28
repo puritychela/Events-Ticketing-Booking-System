@@ -20,8 +20,36 @@ const eventRouter = Router();
  * @swagger
  * /events:
  *   get:
- *     summary: Get all events
+ *     summary: Get all events with optional filters
  *     tags: [Events]
+ *     parameters:
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search term for title
+ *       - in: query
+ *         name: category
+ *         schema:
+ *           type: string
+ *         description: Filter by event category
+ *       - in: query
+ *         name: venueId
+ *         schema:
+ *           type: integer
+ *         description: Filter by venue ID
+ *       - in: query
+ *         name: eventType
+ *         schema:
+ *           type: string
+ *           enum: [Online, In-person]
+ *         description: Filter by event type
+ *       - in: query
+ *         name: accessLevel
+ *         schema:
+ *           type: string
+ *           enum: [Free, VIP]
+ *         description: Filter by access level
  *     responses:
  *       200:
  *         description: List of events
@@ -39,7 +67,7 @@ eventRouter.get("/", getEvents);
  *         name: id
  *         required: true
  *         schema:
- *           type: string
+ *           type: integer
  *         description: Event ID
  *     responses:
  *       200:
@@ -62,19 +90,39 @@ eventRouter.get("/:id", getEventById);
  *           schema:
  *             type: object
  *             required:
- *               - name
+ *               - title
  *               - date
- *               - location
+ *               - time
+ *               - venueId
+ *               - ticketPrice
  *             properties:
- *               name:
- *                 type: string
- *               date:
- *                 type: string
- *                 format: date-time
- *               location:
+ *               title:
  *                 type: string
  *               description:
  *                 type: string
+ *               category:
+ *                 type: string
+ *               venueId:
+ *                 type: integer
+ *               date:
+ *                 type: string
+ *                 format: date
+ *               time:
+ *                 type: string
+ *                 format: time
+ *               ticketPrice:
+ *                 type: number
+ *                 format: float
+ *               ticketsTotal:
+ *                 type: integer
+ *               imageUrl:
+ *                 type: string
+ *               eventType:
+ *                 type: string
+ *                 enum: [Online, In-person]
+ *               accessLevel:
+ *                 type: string
+ *                 enum: [Free, VIP]
  *     responses:
  *       201:
  *         description: Event created successfully
@@ -92,7 +140,7 @@ eventRouter.post("/", createEvent);
  *         name: id
  *         required: true
  *         schema:
- *           type: string
+ *           type: integer
  *         description: Event ID
  *     requestBody:
  *       content:
@@ -100,15 +148,32 @@ eventRouter.post("/", createEvent);
  *           schema:
  *             type: object
  *             properties:
- *               name:
- *                 type: string
- *               date:
- *                 type: string
- *                 format: date-time
- *               location:
+ *               title:
  *                 type: string
  *               description:
  *                 type: string
+ *               category:
+ *                 type: string
+ *               venueId:
+ *                 type: integer
+ *               date:
+ *                 type: string
+ *                 format: date
+ *               time:
+ *                 type: string
+ *                 format: time
+ *               ticketPrice:
+ *                 type: number
+ *               ticketsTotal:
+ *                 type: integer
+ *               imageUrl:
+ *                 type: string
+ *               eventType:
+ *                 type: string
+ *                 enum: [Online, In-person]
+ *               accessLevel:
+ *                 type: string
+ *                 enum: [Free, VIP]
  *     responses:
  *       200:
  *         description: Event updated successfully
@@ -126,10 +191,10 @@ eventRouter.put("/:id", updateEvent);
  *         name: id
  *         required: true
  *         schema:
- *           type: string
+ *           type: integer
  *         description: Event ID
  *     responses:
- *       204:
+ *       200:
  *         description: Event deleted
  */
 eventRouter.delete("/:id", deleteEvent);

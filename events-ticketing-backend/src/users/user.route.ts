@@ -5,10 +5,14 @@ import {
   createUser,
   updateUser,
   deleteUser,
+  updateProfilePicture,
 } from "./user.controller";
 import { adminRoleAuth } from "../middleware/bearAuth";
 import { validate } from "../middleware/validate";
-import { createUserSchema, updateUserSchema } from "../validators/users.validator";
+import {
+  createUserSchema,
+  userUpdateSchema,
+} from "../validators/users.validator";
 
 const userRouter = Router();
 
@@ -31,7 +35,7 @@ const userRouter = Router();
  *       200:
  *         description: List of users
  */
-userRouter.get("/", adminRoleAuth,  getUsers);
+userRouter.get("/", adminRoleAuth, getUsers);
 
 /**
  * @swagger
@@ -61,38 +65,24 @@ userRouter.get("/:id", adminRoleAuth, getUserById);
  *   post:
  *     summary: Create a new user
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - firstName
- *               - lastName
- *               - email
- *               - password
- *             properties:
- *               firstName:
- *                 type: string
- *                 example: "Purity"
- *               lastName:
- *                 type: string
- *                 example: "Chelangat"
- *               email:
- *                 type: string
- *                 example: "purity@example.com"
- *               password:
- *                 type: string
- *                 example: "Password123"
- *               role:
- *                 type: string
- *                 example: "user"
+ *             $ref: '#/components/schemas/CreateUser'
  *     responses:
  *       201:
  *         description: User created
  */
-userRouter.post("/",validate(createUserSchema), createUser);
+userRouter.post(
+  "/",
+  adminRoleAuth,
+  validate(createUserSchema),
+  createUser
+);
 
 /**
  * @swagger
@@ -100,6 +90,8 @@ userRouter.post("/",validate(createUserSchema), createUser);
  *   put:
  *     summary: Update a user
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - name: id
  *         in: path
@@ -111,25 +103,19 @@ userRouter.post("/",validate(createUserSchema), createUser);
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               firstName:
- *                 type: string
- *               lastName:
- *                 type: string
- *               email:
- *                 type: string
- *               password:
- *                 type: string
- *               role:
- *                 type: string
+ *             $ref: '#/components/schemas/UpdateUser'
  *     responses:
  *       200:
  *         description: User updated
  *       404:
  *         description: User not found
  */
-userRouter.put("/:id",validate(updateUserSchema), updateUser);
+userRouter.put(
+  "/:id",
+  adminRoleAuth,
+  validate(userUpdateSchema),
+  updateUser
+);
 
 /**
  * @swagger
@@ -153,11 +139,34 @@ userRouter.put("/:id",validate(updateUserSchema), updateUser);
  */
 userRouter.delete("/:id", adminRoleAuth, deleteUser);
 
+/**
+ * @swagger
+ * /api/users/{id}/profile_picture:
+ *   put:
+ *     summary: Update user profile picture
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               profilePicture:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Profile picture updated
+ */
+userRouter.put("/:id/profile_picture", adminRoleAuth, updateProfilePicture);
+
 export default userRouter;
-
-
-
-
-
-
-

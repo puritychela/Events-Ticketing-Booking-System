@@ -4,17 +4,17 @@ import {
   getPaymentById,
   createPayment,
   updatePayment,
-  deletePayment,
+  deletePayment, // ✅ Import the Daraja controller
 } from "./payments.controller";
-
 
 const paymentRouter = Router();
 
-// Base path: /api/users (from server.ts)
-paymentRouter.get("/", getPayments); 
-paymentRouter.get("/:id", getPaymentById); 
-paymentRouter.post("/", createPayment); 
-paymentRouter.put("/:id", updatePayment); 
-paymentRouter.delete("/:id", deletePayment); 
+// Base path: /api/payments
+paymentRouter.get("/", getPayments);
+paymentRouter.get("/:id", getPaymentById);
+paymentRouter.post("/", createPayment);
+paymentRouter.put("/:id", updatePayment);
+paymentRouter.delete("/:id", deletePayment);
+
 
 export default paymentRouter;

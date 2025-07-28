@@ -1,5 +1,11 @@
+// src/services/darajaService.ts
 import axios from "axios";
 import dotenv from "dotenv";
+import {
+  payment,
+  TPaymentInsert,
+  TPaymentSelect,
+} from "../drizzle/schema"
 
 dotenv.config();
 
@@ -11,7 +17,6 @@ const {
   DARAJA_CALLBACK_URL,
 } = process.env;
 
-// Validate environment variables
 if (
   !DARAJA_CONSUMER_KEY ||
   !DARAJA_CONSUMER_SECRET ||
@@ -22,25 +27,29 @@ if (
   throw new Error("🚨 Missing required Daraja environment variables");
 }
 
-// 1. Get access token
+// 1. Generate access token
 export const getAccessToken = async (): Promise<string> => {
-  const auth = Buffer.from(`${DARAJA_CONSUMER_KEY}:${DARAJA_CONSUMER_SECRET}`).toString("base64");
+  const credentials = `${DARAJA_CONSUMER_KEY}:${DARAJA_CONSUMER_SECRET}`;
+  const encodedCredentials = Buffer.from(credentials).toString("base64");
 
   try {
-    const res = await axios.get(
+    const response = await axios.get(
       "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
       {
         headers: {
-          Authorization: `Basic ${auth}`,
+          Authorization: `Basic ${encodedCredentials}`,
         },
       }
     );
 
-    console.log("✅ Daraja Access Token:", res.data.access_token);
-    return res.data.access_token;
-  } catch (err: any) {
-    console.error("❌ Failed to get access token:", err.response?.data || err.message);
-    throw new Error("Daraja access token fetch failed");
+    const token = response.data.access_token;
+    if (!token) throw new Error("No token received from Daraja");
+
+    console.log("✅ Access Token Received:", token);
+    return token;
+  } catch (error: any) {
+    console.error("❌ Failed to get access token:", error.response?.data || error.message);
+    throw new Error("Failed to get Daraja access token");
   }
 };
 
@@ -48,15 +57,10 @@ export const getAccessToken = async (): Promise<string> => {
 export const initiateSTKPush = async (phone: string, amount: number) => {
   const accessToken = await getAccessToken();
 
-  // Generate timestamp: YYYYMMDDHHMMSS
-  const date = new Date();
-  const timestamp =
-    date.getFullYear().toString() +
-    String(date.getMonth() + 1).padStart(2, "0") +
-    String(date.getDate()).padStart(2, "0") +
-    String(date.getHours()).padStart(2, "0") +
-    String(date.getMinutes()).padStart(2, "0") +
-    String(date.getSeconds()).padStart(2, "0");
+  const timestamp = new Date()
+    .toISOString()
+    .replace(/[-T:.Z]/g, "")
+    .slice(0, 14); // YYYYMMDDHHMMSS
 
   const password = Buffer.from(
     `${DARAJA_SHORT_CODE}${DARAJA_PASSKEY}${timestamp}`
@@ -77,7 +81,7 @@ export const initiateSTKPush = async (phone: string, amount: number) => {
     PhoneNumber: formattedPhone,
     CallBackURL: DARAJA_CALLBACK_URL,
     AccountReference: "BookingSystem",
-    TransactionDesc: "Booking Payment",
+    TransactionDesc: "Event Booking Payment",
   };
 
   try {
@@ -87,16 +91,17 @@ export const initiateSTKPush = async (phone: string, amount: number) => {
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
         },
       }
     );
 
-    console.log("✅ STK Push Request Sent:", response.data);
+    console.log("✅ STK Push Initiated Successfully:", response.data);
     return response.data;
-  } catch (err: any) {
-    console.error("❌ STK Push Failed:", err.response?.data || err.message);
-    throw new Error("Daraja STK push failed");
+  } catch (error: any) {
+    console.error("❌ STK Push Failed:", error.response?.data || error.message);
+    throw new Error(
+      error.response?.data?.errorMessage || "Daraja STK push failed"
+    );
   }
 };
-
-

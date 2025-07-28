@@ -7,33 +7,34 @@ import {
   deleteBookingService,
 } from "./booking.service";
 
-// ✅ GET /api/bookings – Admin or all bookings
+// ✅ GET /api/bookings
 export const getBookings = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const bookings = await getAllBookingsService();
     res.status(200).json(bookings);
     return;
   } catch (err) {
-    return next(err);
+    next(err);
+    return;
   }
 };
 
-// ✅ GET /api/bookings/user/me – Current user's bookings
+// ✅ GET /api/bookings/user/me
 export const getMyBookings = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const userId = (req as any).user?.id;
+    const userId = req.user?.userId;
 
     if (!userId) {
       res.status(401).json({ message: "Unauthorized – user not authenticated" });
       return;
     }
 
-    const bookings = await getAllBookingsService({ userId });
-
+    const bookings = await getAllBookingsService({ userId: String(userId) });
     res.status(200).json(bookings);
     return;
   } catch (err) {
-    return next(err);
+    next(err);
+    return;
   }
 };
 
@@ -41,7 +42,7 @@ export const getMyBookings = async (req: Request, res: Response, next: NextFunct
 export const getBookingById = async (req: Request, res: Response, next: NextFunction) => {
   const id = parseInt(req.params.id);
   if (isNaN(id)) {
-    res.status(400).json({ error: "Invalid booking ID" });
+    res.status(400).json({ message: "Invalid booking ID" });
     return;
   }
 
@@ -55,36 +56,47 @@ export const getBookingById = async (req: Request, res: Response, next: NextFunc
     res.status(200).json(booking);
     return;
   } catch (err) {
-    return next(err);
+    next(err);
+    return;
   }
 };
 
 // ✅ POST /api/bookings
 export const createBooking = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const userId = (req as any).user?.id;
-    const { eventId } = req.body;
+    const userId = req.user?.userId;
+    const { eventId, quantity } = req.body;
 
     if (!userId) {
       res.status(401).json({ message: "Unauthorized – user not authenticated" });
       return;
     }
 
-    if (!eventId || isNaN(Number(eventId))) {
+    const parsedEventId = Number(eventId);
+    const parsedQuantity = Number(quantity);
+
+    if (!parsedEventId || isNaN(parsedEventId)) {
       res.status(400).json({ message: "Valid eventId is required" });
+      return;
+    }
+
+    if (!parsedQuantity || isNaN(parsedQuantity) || parsedQuantity <= 0) {
+      res.status(400).json({ message: "Valid quantity is required" });
       return;
     }
 
     const newBooking = await createBookingService({
       userId,
-      eventId: Number(eventId),
+      eventId: parsedEventId,
+      quantity: parsedQuantity,
       bookingStatus: "Pending",
     });
 
     res.status(201).json(newBooking);
     return;
   } catch (err) {
-    return next(err);
+    next(err);
+    return;
   }
 };
 
@@ -92,7 +104,7 @@ export const createBooking = async (req: Request, res: Response, next: NextFunct
 export const updateBooking = async (req: Request, res: Response, next: NextFunction) => {
   const id = parseInt(req.params.id);
   if (isNaN(id)) {
-    res.status(400).json({ error: "Invalid booking ID" });
+    res.status(400).json({ message: "Invalid booking ID" });
     return;
   }
 
@@ -106,7 +118,8 @@ export const updateBooking = async (req: Request, res: Response, next: NextFunct
     res.status(200).json({ message: "Booking updated successfully" });
     return;
   } catch (err) {
-    return next(err);
+    next(err);
+    return;
   }
 };
 
@@ -114,7 +127,7 @@ export const updateBooking = async (req: Request, res: Response, next: NextFunct
 export const deleteBooking = async (req: Request, res: Response, next: NextFunction) => {
   const id = parseInt(req.params.id);
   if (isNaN(id)) {
-    res.status(400).json({ error: "Invalid booking ID" });
+    res.status(400).json({ message: "Invalid booking ID" });
     return;
   }
 
@@ -128,6 +141,7 @@ export const deleteBooking = async (req: Request, res: Response, next: NextFunct
     res.status(200).json({ message: "Booking deleted successfully" });
     return;
   } catch (err) {
-    return next(err);
+    next(err);
+    return;
   }
 };

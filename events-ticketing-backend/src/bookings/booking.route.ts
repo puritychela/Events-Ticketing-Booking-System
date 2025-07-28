@@ -10,27 +10,29 @@ import {
 
 import {
   userRoleAuth,
-  authRoleAuth, // for both user + admin
+  authRoleAuth, // both user and admin
+  adminRoleAuth,
 } from "../middleware/bearAuth";
 
 const bookingRouter = Router();
 
-// ✅ Admin or both roles can view all bookings
-bookingRouter.get("/", authRoleAuth);
+// ✅ Admin or any authenticated user can view all bookings
+bookingRouter.get("/",  getBookings);
 
-// ✅ Authenticated users only (user or admin can view their own)
-bookingRouter.get("/user/me", authRoleAuth, getMyBookings);
+// ✅ Authenticated user can view their own bookings
+bookingRouter.get("/user/me", userRoleAuth, getMyBookings);
 
-// ✅ Get single booking (optional: can add auth if needed)
-bookingRouter.get("/:id", getBookingById);
+// ✅ Get a single booking - protected (either owner or admin should be checked inside controller if needed)
+bookingRouter.get("/:id", authRoleAuth, getBookingById);
 
-// ✅ Only logged-in users (user or admin) can create a booking
-bookingRouter.post("/", authRoleAuth, createBooking);
+// ✅ Only authenticated users (user role) can create a booking
+bookingRouter.post("/", userRoleAuth, createBooking);
 
-// ✅ Update booking – Optional: protect this route with authRoleAuth
+// ✅ Only authenticated users (user or admin) can update bookings
+// NOTE: Ideally, check ownership/admin role inside controller
 bookingRouter.put("/:id", authRoleAuth, updateBooking);
 
-// ✅ Delete booking – Optional: protect with adminRoleAuth if only admins can delete
-bookingRouter.delete("/:id", authRoleAuth, deleteBooking);
+// ✅ Only admins can delete bookings
+bookingRouter.delete("/:id", adminRoleAuth, deleteBooking);
 
 export default bookingRouter;

@@ -110,4 +110,5 @@ export const deletePayment = async (req: Request, res: Response, next: NextFunct
   } catch (error) {
     next(error);
   }
-};
+}
+

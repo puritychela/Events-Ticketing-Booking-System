@@ -12,10 +12,13 @@ import {
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
+
 // Enums
 export const roleEnum = pgEnum("role", ["user", "admin"]);
 export const bookingStatusEnum = pgEnum("booking_status", ["Pending", "Confirmed", "Cancelled"]);
 export const paymentStatusEnum = pgEnum("payment_status", ["Pending", "Paid", "Failed"]);
+export const accessLevelEnum = pgEnum("access_level", ["Free", "VIP"]);
+export const eventTypeEnum = pgEnum("event_type", ["Online", "In-person"]);
 
 // Users Table
 export const user = pgTable("users", {
@@ -27,6 +30,7 @@ export const user = pgTable("users", {
   contactPhone: varchar("contact_phone", { length: 20 }),
   address: varchar("address", { length: 100 }),
   role: roleEnum("role").default("user"),
+  profilepicture: varchar("profilepicture", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -64,6 +68,8 @@ export const event = pgTable("events", {
   imageUrl: varchar("image_url", { length: 255 }), // ✅ added image field
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+  eventType: eventTypeEnum("event_type"),      // "Online" | "In-person"
+  accessLevel: accessLevelEnum("access_level"),
 });
 
 
@@ -103,6 +109,7 @@ export const bookingRelations = relations(booking, ({ one, many }) => ({
 export const payment = pgTable("payments", {
   paymentId: serial("payment_id").primaryKey(),
   bookingId: integer("booking_id").references(() => booking.bookingId, { onDelete: "cascade" }),
+  phone: varchar("phone", { length: 20 }),
   amount: decimal("amount", { precision: 10, scale: 2 }),
   paymentStatus: paymentStatusEnum("payment_status").default("Pending"),
   paymentDate: timestamp("payment_date").defaultNow(),
@@ -136,9 +143,47 @@ export const supportTicketRelations = relations(supportTicket, ({ one }) => ({
     references: [user.userId],
   }),
 }));
+export const ticketReply = pgTable("ticket_replies", {
+  replyId: serial("reply_id").primaryKey(),
+  ticketId: integer("ticket_id")
+    .references(() => supportTicket.ticketId, { onDelete: "cascade" }),
+  responderId: integer("responder_id")
+    .references(() => user.userId, { onDelete: "cascade" }), // could be admin or user
+  message: text("message"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const ticketReplyRelations = relations(ticketReply, ({ one }) => ({
+  ticket: one(supportTicket, {
+    fields: [ticketReply.ticketId],
+    references: [supportTicket.ticketId],
+  }),
+  responder: one(user, {
+    fields: [ticketReply.responderId],
+    references: [user.userId],
+  }),
+}));
+export const ticket = pgTable("tickets", {
+  ticketId: serial("ticket_id").primaryKey(),
+  bookingId: integer("booking_id").references(() => booking.bookingId, { onDelete: "cascade" }),
+  eventId: integer("event_id").references(() => event.eventId, { onDelete: "cascade" }),
+  userId: integer("user_id").references(() => user.userId, { onDelete: "cascade" }),
+  qrCode: varchar("qr_code", { length: 255 }),
+  seatNumber: varchar("seat_number", { length: 50 }),
+  issuedAt: timestamp("issued_at").defaultNow(),
+});
+
+export const ticketRelations = relations(ticket, ({ one }) => ({
+  booking: one(booking, { fields: [ticket.bookingId], references: [booking.bookingId] }),
+  event: one(event, { fields: [ticket.eventId], references: [event.eventId] }),
+  user: one(user, { fields: [ticket.userId], references: [user.userId] }),
+}));
+
 
 
 // Infer types
+export type TTicketReplyInsert = typeof ticketReply.$inferInsert;
+export type TTicketReplySelect = typeof ticketReply.$inferSelect;
 export type TUserInsert = typeof user.$inferInsert;
 export type TUserSelect = typeof user.$inferSelect;
 
@@ -156,4 +201,7 @@ export type TPaymentSelect = typeof payment.$inferSelect;
 
 export type TSupportTicketInsert = typeof supportTicket.$inferInsert;
 export type TSupportTicketSelect = typeof supportTicket.$inferSelect;
+
+export type TTicketInsert = typeof ticket.$inferInsert;
+export type TTicketSelect = typeof ticket.$inferSelect;
 

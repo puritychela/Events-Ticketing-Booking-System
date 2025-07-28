@@ -4,7 +4,7 @@ import { Request, Response, NextFunction, RequestHandler } from "express";
 import { AnyZodObject } from "zod";
 
 export const validate = (schema: AnyZodObject): RequestHandler => {
-  return (req, res, next) => {
+  return (req: Request, res: Response, next: NextFunction) => {
     try {
       schema.parse({
         body: req.body,
@@ -12,16 +12,14 @@ export const validate = (schema: AnyZodObject): RequestHandler => {
         params: req.params,
       });
 
-      next(); // ✅ Valid input, proceed
+      next(); // ✅ Input is valid
     } catch (error: any) {
       res.status(400).json({
         message: "Validation failed",
         errors: error.errors || "Invalid request",
       });
 
-      return; // ✅ ensures consistent return type
+      return;
     }
   };
 };
-
-

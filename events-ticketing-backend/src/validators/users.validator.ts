@@ -11,16 +11,20 @@ export const createUserSchema = z.object({
   role: z.enum(["admin", "user"]).optional()
 });
 
-// Update User
-export const updateUserSchema = z.object({
-  firstname: z.string().min(2).optional(),
-  lastname: z.string().min(2).optional(),
+
+
+export const userUpdateSchema = z.object({
+  firstname: z.string().optional(),
+  lastname: z.string().optional(),
   email: z.string().email().optional(),
   password: z.string().min(6).optional(),
   contactPhone: z.string().optional(),
   address: z.string().optional(),
-  role: z.enum(["admin", "user"]).optional()
+  profilepicture: z.string().url().optional(), // Make sure it's optional
 });
+
+
+
 
 // Login Schema
 export const loginSchema = z.object({
