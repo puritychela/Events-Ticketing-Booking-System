@@ -1,10 +1,11 @@
-import express from "express";
-import * as ticketController from "../tickets/ticket.controller";
+// routes/ticket.route.ts
+import { Router } from "express";
+import { getMyTickets } from "../tickets/ticket.controller";
+import { userRoleAuth } from "../middleware/bearAuth";
 
-const router = express.Router();
+const ticketRouter = Router();
 
-router.post("/", ticketController.createTicket);
-router.get("/user/:userId", ticketController.getTicketsByUser);
-router.get("/:ticketId", ticketController.getTicketById);
+ticketRouter.get("/my-tickets", userRoleAuth, getMyTickets);
 
-export default router;
+export default ticketRouter;
+

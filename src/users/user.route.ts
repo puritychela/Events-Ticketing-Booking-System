@@ -7,7 +7,7 @@ import {
   deleteUser,
   updateProfilePicture,
 } from "./user.controller";
-import { adminRoleAuth } from "../middleware/bearAuth";
+import { adminRoleAuth, authRoleAuth } from "../middleware/bearAuth";
 import { validate } from "../middleware/validate";
 import {
   createUserSchema,
@@ -79,8 +79,6 @@ userRouter.get("/:id", adminRoleAuth, getUserById);
  */
 userRouter.post(
   "/",
-  adminRoleAuth,
-  validate(createUserSchema),
   createUser
 );
 
@@ -112,8 +110,6 @@ userRouter.post(
  */
 userRouter.put(
   "/:id",
-  adminRoleAuth,
-  validate(userUpdateSchema),
   updateUser
 );
 
@@ -167,6 +163,6 @@ userRouter.delete("/:id", adminRoleAuth, deleteUser);
  *       200:
  *         description: Profile picture updated
  */
-userRouter.put("/:id/profile_picture", adminRoleAuth, updateProfilePicture);
+userRouter.put("/:id/profile_picture", authRoleAuth, updateProfilePicture);
 
 export default userRouter;

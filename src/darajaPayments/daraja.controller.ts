@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
 import { initiateSTKPush } from "../darajaPayments/daraja.service";
-import { payment } from "../drizzle/schema";
+import { payment,ticket, booking } from "../drizzle/schema";
 import db from "../drizzle/db";
 import { eq } from "drizzle-orm";
+import { v4 as uuidv4 } from "uuid";
 import { confirmBookingService } from "../bookings/booking.service";
 
 // Temporary in-memory mapping of CheckoutRequestID → bookingId
@@ -57,6 +58,28 @@ export const payForBooking = async (req: Request, res: Response) => {
       await confirmBookingService(bookingId);
       console.log("✅ Booking confirmed after STK initiation:", bookingId);
     }
+    const bookingDetails = await db
+  .select()
+  .from(booking)
+  .where(eq(booking.bookingId, bookingId))
+  .then(rows => rows[0]);
+
+if (!bookingDetails) {
+  console.error("❌ Booking not found when issuing ticket");
+  res.status(404).json({ message: "Booking not found" });
+  return;
+}
+
+// ✅ Create ticket entry
+await db.insert(ticket).values({
+  bookingId: bookingDetails.bookingId,
+  userId: bookingDetails.userId,
+  eventId: bookingDetails.eventId,
+  qrCode: uuidv4(), // unique QR code
+  seatNumber: "A1", // hardcoded for now, can be dynamic later
+});
+console.log("🎟️ Ticket created for user:", bookingDetails.userId);
+
 
     res.status(200).json({
       message: "STK push initiated successfully. Booking confirmed and payment recorded.",

@@ -12,6 +12,7 @@ import paymentRouter from "./payments/payments.route";
 import darajaRouter from "./darajaPayments/daraja.route";
 // import ticketReplyRouter from "./ticketsReply/TicketsReply.route";
 import cors from 'cors'
+import ticketRouter from "./tickets/ticket.route";
 
 
 dotenv.config();
@@ -24,7 +25,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors())
 
 //  Correct usage of rate limiter (must pass the actual function, not a string)
-app.use(rateLimiterMiddleware);
+// app.use(rateLimiterMiddleware);
 
 app.get("/", (req, res) => {
   res.send("Welcome to Express + TypeScript Backend");
@@ -40,6 +41,7 @@ app.use("/api", authRouter);
 app.use("/api/payments", paymentRouter);
 app.use("/api/darajaPayments", darajaRouter);
 // app.use("/api", ticketReplyRouter);
+app.use("/api/tickets", ticketRouter); 
 
 // Start server
 const PORT = process.env.PORT || 5000;

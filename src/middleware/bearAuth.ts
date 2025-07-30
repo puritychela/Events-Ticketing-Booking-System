@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import { roleEnum } from "../drizzle/schema";
 
 dotenv.config();
 
@@ -30,7 +31,7 @@ export const verifyToken = (
 ): DecodedToken | null => {
   try {
     const decoded = jwt.verify(token, secret) as DecodedToken;
-    console.log("🔑 Token successfully verified:", decoded);
+    // console.log("🔑 Token successfully verified:", decoded);
     return decoded;
   } catch (error) {
     console.error("❌ Token verification failed:", error);
@@ -47,7 +48,7 @@ export const authMiddleware = (
 ): void => {
   const authHeader = req.header("authorization");
 
-  console.log("📥 Incoming Authorization header:", authHeader);
+  // console.log("📥 Incoming Authorization header:", authHeader);
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     console.warn("🔒 No or malformed Authorization header");
@@ -58,7 +59,7 @@ export const authMiddleware = (
   }
 
   const token = authHeader.split(" ")[1];
-  console.log("🔓 Extracted token:", token);
+  // console.log("🔓 Extracted token:", token);
 
   const decodedToken = verifyToken(token, process.env.JWT_SECRET as string);
 
@@ -68,20 +69,24 @@ export const authMiddleware = (
     return;
   }
 
-  console.log("✅ Authenticated user:", {
-    userId: decodedToken.userId,
-    email: decodedToken.email,
-    role: decodedToken.role,
-  });
+  // console.log("✅ Authenticated user:", {
+  //   userId: decodedToken.userId,
+  //   email: decodedToken.email,
+  //   role: decodedToken.role,
+  // });
 
   const userRole = decodedToken.role;
 
-  console.log(`🛂 Required role: ${requiredRole}, User role: ${userRole}`);
+  // console.log(`🛂 Required role: ${requiredRole}, User role: ${userRole}`);
 
   // Role check
-  if (requiredRole === "both" || userRole === requiredRole) {
+    if (
+    requiredRole === "both" ||
+    (requiredRole === "admin" && userRole === "admin") ||
+    (requiredRole === "user" && userRole === "user")
+  ) {
     req.user = decodedToken;
-    console.log("✅ Role authorized – proceeding to next middleware.");
+    // console.log("✅ Role authorized – proceeding to next middleware.");
     return next();
   }
 
@@ -116,3 +121,5 @@ export const authRoleAuth = (
   console.log("🔐 Checking for user or admin role...");
   authMiddleware(req, res, next, "both");
 };
+
+

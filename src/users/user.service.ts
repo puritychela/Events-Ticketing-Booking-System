@@ -1,44 +1,50 @@
 // src/users/user.service.ts
+
 import { eq } from "drizzle-orm";
 import db from "../drizzle/db";
 import { user, TUserInsert, TUserSelect } from "../drizzle/schema";
 
-// Get all users
+// Fetch all users
 export const getUsersServices = async (): Promise<TUserSelect[]> => {
-  return await db.query.user.findMany();
+  return db.query.user.findMany();
 };
 
-// Get user by ID
+// Fetch a single user by ID
 export const getUserByIdServices = async (
   userId: number
 ): Promise<TUserSelect | undefined> => {
-  return await db.query.user.findFirst({
+  return db.query.user.findFirst({
     where: eq(user.userId, userId),
   });
 };
 
-// Create user
+// Create a new user
 export const createUserServices = async (
   newUser: TUserInsert
-): Promise<string> => {
-  await db.insert(user).values(newUser).returning();
-  return "User created successfully";
+): Promise<TUserSelect | undefined> => {
+  const [createdUser] = await db.insert(user).values(newUser).returning();
+  return createdUser;
 };
 
-// Update user (Admin use)
+// Update user (admin + partial updates)
 export const updateUserServices = async (
   userId: number,
-  updatedUser: Partial<Omit<TUserInsert, "userId">>
+  updatedData: Partial<TUserInsert>
 ): Promise<TUserSelect | undefined> => {
-  const [updated] = await db
+  if (!updatedData || Object.keys(updatedData).length === 0) {
+    throw new Error("No data provided for update.");
+  }
+
+  const [updatedUser] = await db
     .update(user)
-    .set(updatedUser)
+    .set(updatedData)
     .where(eq(user.userId, userId))
     .returning();
-  return updated;
+
+  return updatedUser;
 };
 
-// Update user profile (User self-service)
+// Update user profile (self-service)
 export const updateUserProfileService = async (
   userId: number,
   profileData: {
@@ -51,21 +57,27 @@ export const updateUserProfileService = async (
     profilepicture?: string;
   }
 ): Promise<TUserSelect | undefined> => {
-  const [updated] = await db
+  if (!profileData || Object.keys(profileData).length === 0) {
+    throw new Error("No profile data provided for update.");
+  }
+
+  const [updatedProfile] = await db
     .update(user)
     .set(profileData)
     .where(eq(user.userId, userId))
     .returning();
-  return updated;
+
+  return updatedProfile;
 };
 
 // Delete user
 export const deleteUserServices = async (
   userId: number
 ): Promise<TUserSelect | undefined> => {
-  const [deleted] = await db
+  const [deletedUser] = await db
     .delete(user)
     .where(eq(user.userId, userId))
     .returning();
-  return deleted;
+
+  return deletedUser;
 };

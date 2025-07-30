@@ -48,6 +48,7 @@ export const getUserById = async (req: Request, res: Response, next: NextFunctio
 // CREATE user
 export const createUser = async (req: Request, res: Response, next: NextFunction) => {
   const { firstname, lastname, email, password, contactPhone, address, role } = req.body;
+  console.log(req.body)
 
   if (!firstname || !lastname || !email || !password) {
     res.status(400).json({ error: "Firstname, lastname, email, and password are required" });
@@ -80,9 +81,10 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
 // UPDATE user (partial)
 export const updateUser = async (req: Request, res: Response, next: NextFunction) => {
   const userId = parseInt(req.params.id);
+
   if (isNaN(userId)) {
-    res.status(400).json({ error: "Invalid user ID" });
-    return;
+     res.status(400).json({ error: "Invalid user ID" });
+     return
   }
 
   try {
@@ -90,7 +92,10 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
       Object.entries(req.body).filter(([_, value]) => value !== undefined && value !== null)
     );
 
+    console.log("📦 Cleaned update data:", cleanedData);
+
     const parsedResult = userUpdateSchema.safeParse(cleanedData);
+
     if (!parsedResult.success) {
       res.status(400).json({
         message: "Validation failed",
@@ -99,23 +104,26 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
           message: err.message,
         })),
       });
-      return;
+      return
     }
 
     const validatedData = parsedResult.data;
+    console.log(validatedData)
+
     const updatedUser = await updateUserServices(userId, validatedData);
 
     if (!updatedUser) {
-      res.status(404).json({ message: "User not found or failed to update" });
-      return;
+       res.status(404).json({ message: "User not found or failed to update" });
+       return
     }
 
     res.status(200).json(updatedUser);
-    return;
   } catch (error) {
-    return next(error);
+     next(error);
+     return
   }
 };
+
 
 // DELETE user
 export const deleteUser = async (req: Request, res: Response, next: NextFunction) => {

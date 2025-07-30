@@ -23,6 +23,7 @@ export const createUser = async (req:Request,res:Response) =>{
   user.password = hashedPassword
 
   const newUser = await createUserServices(user)
+  console.log(newUser)
   res.status(201).json({message:newUser})
 
     }catch(error:any){
